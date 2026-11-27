@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Barcode Viewer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="viewer">
+<header class="bar">
+  <h1>Barcode Viewer</h1>
+  <span id="conn" class="pill">Server not connected</span>
+  <div class="bar-right">
+    <label class="sw">Format
+      <select id="fmt">
+        <option value="all">All barcodes</option>
+        <option value="matrix">2D codes (QR / DataMatrix / Aztec / PDF417…)</option>
+        <option value="linear">1D barcodes (Code128 / EAN / UPC…)</option>
+        <option value="qr">QR only</option>
+      </select>
+    </label>
+    <label class="sw"><input type="checkbox" id="autocopy" checked> Auto-copy</label>
+    <label class="sw"><input type="checkbox" id="sound" checked> Beep on scan</label>
+    <span id="soundHint" class="hint-inline" hidden>Tap or click the page once to enable sound</span>
+  </div>
+</header>
+<main class="layout">
+  <section class="stage">
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty">
+      <p class="big">Waiting for a phone</p>
+      <p>Open this address in your phone's browser (same Wi-Fi as this computer):</p>
+      <ul id="urls"></ul>
+      <p class="hint">The first visit shows a certificate warning (self-signed). Choose "Advanced → Proceed", then tap "Start sending".</p>
+    </div>
+  </section>
+  <aside class="log">
+    <section class="latest" id="latest">
+      <div class="latest-head"><h2>Latest result</h2><span id="latestMeta" class="latest-meta"></span></div>
+      <div id="latestText" class="latest-text idle">Waiting for a barcode…</div>
+      <div id="latestActs" class="acts"></div>
+      <div id="copyStatus" class="copy-status" aria-live="polite"></div>
+    </section>
+    <div class="log-head">
+      <h2>History<span id="count">0</span></h2>
+      <div class="head-actions">
+        <button id="copyAll" class="ghost" type="button" disabled title="Copy every scanned code, one per line (oldest first)">Copy all</button>
+        <button id="clear" class="ghost" type="button">Clear</button>
+      </div>
+    </div>
+    <ol id="results"></ol>
+    <p id="none" class="none">No barcodes scanned yet.</p>
+  </aside>
+</main>
+<script src="/vendor/zxing/reader.js"></script>
+<script src="/vendor/jsQR.js"></script>
+<script src="viewer.js"></script>
+</body>
+</html>
