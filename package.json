@@ -1,0 +1,20 @@
+{
+  "name": "qr-bridge",
+  "version": "1.0.0",
+  "description": "Phone camera → local server web page: live WebRTC streaming + barcode decoding",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "up": "node control.js start",
+    "down": "node control.js stop",
+    "restart": "node control.js restart",
+    "status": "node control.js status"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "jsqr": "^1.4.0",
+    "selfsigned": "^2.4.1",
+    "ws": "^8.17.0",
+    "zxing-wasm": "^3.1.8"
+  }
+}
