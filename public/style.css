@@ -139,3 +139,17 @@ figcaption { font-size: 12px; flex-wrap: wrap; }
 .head-actions { display: flex; gap: 8px; }
 button:disabled { opacity: .45; cursor: default; }
 button.ghost:disabled:hover { border-color: var(--line); }
+
+/* ===== Phone connect card (URL + QR) ===== */
+.connect { display: grid; gap: 10px; justify-items: start; margin-bottom: 12px; }
+.qr-img { width: 100%; max-width: 220px; aspect-ratio: 1; display: block; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+.qr-url { font-family: var(--mono); font-size: 13px; color: var(--ink); word-break: break-all; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 10px; width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 99px; padding: 3px 12px; font-size: 12px; font-family: var(--mono); }
+.chip:hover { background: transparent; border-color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.qr-dialog { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); width: min(92vw, 380px); padding: 16px 18px 6px; }
+.qr-dialog::backdrop { background: rgba(23, 33, 43, .45); }
+.qr-dialog-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.qr-dialog .qr-img { max-width: 300px; margin: 0 auto; }
+.qr-dialog .connect { justify-items: center; }

@@ -23,8 +23,9 @@ To use another port: `PORT=9443 ./start.sh` (macOS/Linux) or `set PORT=9443 && s
 
 ## Using it
 
-1. Open `https://localhost:8443/` on this computer (the viewer).
-2. Open `https://<this-computer's-LAN-IP>:8443/phone.html` on the phone (same Wi-Fi) and tap **Start sending**.
+1. Open `https://localhost:8443/` on this computer (the viewer). It shows the phone address and a QR code for it
+   (the **Phone QR** button brings it back after a phone has connected).
+2. Scan that QR code with the phone camera (same Wi-Fi) and tap **Start sending**.
 3. Accept the certificate warning once on each device (the certificate is self-signed).
 
 Run in the foreground instead (Ctrl+C to quit): `npm start`.

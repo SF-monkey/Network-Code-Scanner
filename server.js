@@ -8,6 +8,7 @@ const os = require('os');
 const path = require('path');
 const { WebSocketServer } = require('ws');
 const selfsigned = require('selfsigned');
+const qrcode = require('qrcode-generator');
 
 const { spawn } = require('child_process');
 
@@ -56,14 +57,36 @@ async function copyToClipboard(text) {
   throw lastErr || new Error('clipboard unavailable');
 }
 
+// Most likely phone-reachable address first (home/office LAN ranges), link-local ones dropped
+function ipRank(ip) {
+  if (ip.startsWith('192.168.')) return 0;
+  if (ip.startsWith('10.')) return 1;
+  const m = /^172\.(\d+)\./.exec(ip);
+  if (m && m[1] >= 16 && m[1] <= 31) return 2;
+  return 3;
+}
 function lanIPs() {
   const out = [];
   for (const list of Object.values(os.networkInterfaces())) {
     for (const i of list || []) {
-      if (i.family === 'IPv4' && !i.internal) out.push(i.address);
+      if (i.family === 'IPv4' && !i.internal && !i.address.startsWith('169.254.')) out.push(i.address);
     }
   }
-  return out;
+  return out.sort((a, b) => ipRank(a) - ipRank(b));
+}
+
+// Crisp scalable QR code (always black on white so phone cameras read it reliably)
+function qrSvg(text) {
+  const qr = qrcode(0, 'M');
+  qr.addData(text);
+  qr.make();
+  const n = qr.getModuleCount();
+  const quiet = 4;
+  let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c + quiet} ${r + quiet}h1v1h-1z`;
+  const size = n + quiet * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges">` +
+    `<rect width="${size}" height="${size}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
 }
 
 async function loadCert(ips) {
@@ -109,9 +132,14 @@ async function loadCert(ips) {
     res.type('application/wasm');
     res.sendFile(path.join(zx, 'reader', 'zxing_reader.wasm'));
   });
-  app.get('/api/info', (_req, res) =>
-    res.json({ phoneUrls: ips.map((ip) => `https://${ip}:${PORT}/phone.html`) })
-  );
+  const phoneUrls = ips.map((ip) => `https://${ip}:${PORT}/phone.html`);
+  app.get('/api/info', (_req, res) => res.json({ phoneUrls }));
+  // QR code for the i-th phone URL (index only, so it can't be used to encode arbitrary text)
+  app.get('/api/qr/:i.svg', (req, res) => {
+    const i = Number(req.params.i);
+    if (!Number.isInteger(i) || i < 0 || i >= phoneUrls.length) return res.sendStatus(404);
+    res.type('image/svg+xml').set('Cache-Control', 'no-store').send(qrSvg(phoneUrls[i]));
+  });
 
   const server = https.createServer(creds, app);
   const wss = new WebSocketServer({ server });

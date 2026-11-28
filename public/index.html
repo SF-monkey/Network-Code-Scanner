@@ -11,6 +11,7 @@
   <h1>Barcode Viewer</h1>
   <span id="conn" class="pill">Server not connected</span>
   <div class="bar-right">
+    <button id="qrBtn" class="ghost" type="button">Phone QR</button>
     <label class="sw">Format
       <select id="fmt">
         <option value="all">All barcodes</option>
@@ -29,8 +30,8 @@
     <div id="grid" class="grid"></div>
     <div id="empty" class="empty">
       <p class="big">Waiting for a phone</p>
-      <p>Open this address in your phone's browser (same Wi-Fi as this computer):</p>
-      <ul id="urls"></ul>
+      <p>Scan this QR code with your phone's camera (same Wi-Fi as this computer), or type the address:</p>
+      <div id="connectInline" class="connect"></div>
       <p class="hint">The first visit shows a certificate warning (self-signed). Choose "Advanced → Proceed", then tap "Start sending".</p>
     </div>
   </section>
@@ -52,6 +53,11 @@
     <p id="none" class="none">No barcodes scanned yet.</p>
   </aside>
 </main>
+<dialog id="qrDialog" class="qr-dialog">
+  <div class="qr-dialog-head"><h2>Connect a phone</h2><button id="qrClose" class="ghost" type="button">Close</button></div>
+  <p class="hint">Scan with the phone camera (same Wi-Fi as this computer). The first visit shows a certificate warning (self-signed): choose "Advanced → Proceed".</p>
+  <div id="connectDialog" class="connect"></div>
+</dialog>
 <script src="/vendor/zxing/reader.js"></script>
 <script src="/vendor/jsQR.js"></script>
 <script src="viewer.js"></script>

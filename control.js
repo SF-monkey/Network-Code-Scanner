@@ -22,7 +22,7 @@ const LOG_DIR = path.join(ROOT, 'logs');
 const LOG_FILE = path.join(LOG_DIR, 'server.log');
 const PORT = Number(process.env.PORT) || 8443;
 const IS_WIN = process.platform === 'win32';
-const REQUIRED_DEPS = ['express', 'ws', 'selfsigned', 'jsqr', 'zxing-wasm'];
+const REQUIRED_DEPS = ['express', 'ws', 'selfsigned', 'jsqr', 'zxing-wasm', 'qrcode-generator'];
 
 const args = process.argv.slice(2);
 const command = args.find((a) => !a.startsWith('--')) || 'help';
@@ -76,12 +76,19 @@ function isOurServer(port) {
   });
 }
 
+function ipRank(ip) {
+  if (ip.startsWith('192.168.')) return 0;
+  if (ip.startsWith('10.')) return 1;
+  const m = /^172\.(\d+)\./.exec(ip);
+  if (m && m[1] >= 16 && m[1] <= 31) return 2;
+  return 3;
+}
 function lanIPs() {
   const out = [];
   for (const list of Object.values(os.networkInterfaces())) {
-    for (const i of list || []) if (i.family === 'IPv4' && !i.internal) out.push(i.address);
+    for (const i of list || []) if (i.family === 'IPv4' && !i.internal && !i.address.startsWith('169.254.')) out.push(i.address);
   }
-  return out;
+  return out.sort((a, b) => ipRank(a) - ipRank(b));
 }
 
 function printUrls(port) {

@@ -519,13 +519,70 @@ function connect() {
   };
 }
 
+/* ---------- Phone connect card (URL + QR code) ---------- */
+let phoneUrls = [];
+let selectedUrl = 0;
+
+function renderConnect(box) {
+  box.replaceChildren();
+  if (!phoneUrls.length) {
+    const p = document.createElement('p');
+    p.className = 'hint';
+    p.textContent = 'No LAN address detected. Connect this computer to the same Wi-Fi / network as your phone, then restart the server.';
+    box.append(p);
+    return;
+  }
+  const url = phoneUrls[selectedUrl];
+  const img = document.createElement('img');
+  img.className = 'qr-img';
+  img.alt = `QR code for ${url}`;
+  img.src = `/api/qr/${selectedUrl}.svg`;
+
+  const code = document.createElement('code');
+  code.className = 'qr-url';
+  code.textContent = url;
+
+  const copy = document.createElement('button');
+  copy.type = 'button';
+  copy.className = 'ghost';
+  copy.textContent = 'Copy link';
+  copy.onclick = async () => {
+    copy.textContent = (await writeBrowserClipboard(url)) ? 'Copied' : 'Copy failed';
+    setTimeout(() => (copy.textContent = 'Copy link'), 1500);
+  };
+  box.append(img, code, copy);
+
+  if (phoneUrls.length > 1) {   // several network adapters: let the user pick the right one
+    const note = document.createElement('p');
+    note.className = 'hint';
+    note.textContent = 'Several network addresses found. If the phone can’t connect, try another:';
+    const chips = document.createElement('div');
+    chips.className = 'chips';
+    phoneUrls.forEach((u, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = new URL(u).hostname;
+      b.setAttribute('aria-pressed', String(i === selectedUrl));
+      b.onclick = () => { selectedUrl = i; renderAllConnect(); };
+      chips.append(b);
+    });
+    box.append(note, chips);
+  }
+}
+function renderAllConnect() {
+  renderConnect($('connectInline'));
+  renderConnect($('connectDialog'));
+}
+
+const qrDialog = $('qrDialog');
+$('qrBtn').onclick = () => (typeof qrDialog.showModal === 'function' ? qrDialog.showModal() : qrDialog.setAttribute('open', ''));
+$('qrClose').onclick = () => (typeof qrDialog.close === 'function' ? qrDialog.close() : qrDialog.removeAttribute('open'));
+qrDialog.addEventListener('click', (e) => { if (e.target === qrDialog) $('qrClose').onclick(); });   // click outside closes
+
 fetch('/api/info').then((r) => r.json()).then((info) => {
-  const ul = $('urls');
-  (info.phoneUrls.length ? info.phoneUrls : [`${location.origin}/phone.html`]).forEach((u) => {
-    const li = document.createElement('li');
-    li.textContent = u;
-    ul.append(li);
-  });
+  phoneUrls = info.phoneUrls || [];
+  renderAllConnect();
 }).catch(() => {});
 connect();
 showCopyMode();
